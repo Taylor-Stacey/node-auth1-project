@@ -1,10 +1,11 @@
-const bcrypt = require('bcryptjs');
 const express = require('express');
+const router = express.Router()
+const Users = require('../users/users-model')
+const bcrypt = require('bcryptjs');
 const { checkUsernameFree, checkUsernameExists, checkPasswordLength } = require('./auth-middleware.js')
 // Require `checkUsernameFree`, `checkUsernameExists` and `checkPasswordLength`
 // middleware functions from `auth-middleware.js`. You will need them here!
 
-const router = express.Router()
 // const { route } = require("../server");
 
 
@@ -30,8 +31,15 @@ const router = express.Router()
     "message": "Password must be longer than 3 chars"
   }
  */
-  router.post ('/register',checkPasswordLength,checkUsernameFree, (req,res,next) =>{
-    res.json('register')
+  router.post ('/register', checkPasswordLength, checkUsernameFree, (req,res,next) =>{
+    const { username, password } = req.body
+    const hash = bcrypt.hashSync(password, 8)
+
+    Users.add({ username, password: hash })
+    .then(saved => {
+      res.status(201).json(saved)
+    })
+    .catch(next)
   })
 
 /**
@@ -49,8 +57,16 @@ const router = express.Router()
     "message": "Invalid credentials"
   }
  */
-  router.post ('/login', (req,res,next) =>{
-    res.json('login')
+  router.post ('/login', checkUsernameExists, (req,res,next) =>{
+    const { password } = req.body
+    if(bcrypt.compareSync(password, req.user.password)){
+      //make it so the cookie is set on the client
+      //make it so server stores a session with a session id 
+      req.session.user = req.user
+      res.json({message: `Welcome ${req.user.username}`})
+    }else{
+      next({ status: 401, message: 'Invalid credentials'})
+    }
   })
 
 /**
