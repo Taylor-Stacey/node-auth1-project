@@ -1,3 +1,9 @@
+const bcrypt = require('bcryptjs');
+
+const express = require('express');
+
+const Users = require('../users/users-model')
+
 /*
   If the user does not have a session saved in the server
 
@@ -7,21 +13,7 @@
   }
 */
 function restricted() {
-  let { username, password } = req.body;
-    if(typeof username != 'string' || username.trim() === '') {
-        next({ status: 400, message: 'missing username' });
-        return;
-    } else if(typeof password != 'string') {
-        next({ status: 400, message: 'missing password' });
-        return;
-    }
-
-    req.user = {
-        username: username.trim(),
-        password,
-    };
-
-    next();
+  
 }
 
 /*
@@ -32,8 +24,13 @@ function restricted() {
     "message": "Username taken"
   }
 */
-function checkUsernameFree() {
-
+async function checkUsernameFree(req,res,next) {
+  const result = await Users.findBy({ username: req.user.username }).first();
+    if(result != null) {
+        next({ status: 422, message: 'Username taken' });
+        return;
+    }
+    next();
 }
 
 /*

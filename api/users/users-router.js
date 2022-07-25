@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
 const Users = require('./users-model')
+const { restricted } = require('../auth/auth-middleware')
 
 // Require the `restricted` middleware from `auth-middleware.js`. You will need it here!
 
@@ -26,7 +27,7 @@ const Users = require('./users-model')
     "message": "You shall not pass!"
   }
  */
-  router.get("/", (req, res, next) => {
+  router.get("/", restricted, (req, res, next) => {
     if(userIsNotLoggedIn) {
      next({ message: 'you shall not pass'});
      return;
