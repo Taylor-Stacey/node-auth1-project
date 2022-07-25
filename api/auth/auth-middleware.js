@@ -7,7 +7,21 @@
   }
 */
 function restricted() {
+  let { username, password } = req.body;
+    if(typeof username != 'string' || username.trim() === '') {
+        next({ status: 400, message: 'missing username' });
+        return;
+    } else if(typeof password != 'string') {
+        next({ status: 400, message: 'missing password' });
+        return;
+    }
 
+    req.user = {
+        username: username.trim(),
+        password,
+    };
+
+    next();
 }
 
 /*
@@ -47,3 +61,9 @@ function checkPasswordLength() {
 }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
+module.exports = {
+  restricted,
+  checkUsernameFree,
+  checkPasswordLength,
+  checkUsernameExists,
+}
