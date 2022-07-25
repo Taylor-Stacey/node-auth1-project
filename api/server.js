@@ -25,7 +25,7 @@ const server = express();
 server.use(session({
   name: 'chocolatechip',
   secret: 'my-session-password',
-  saveUnitialized: false,
+  saveUninitialized:false,
   resave: false,
   store: new Store({
     knex,
