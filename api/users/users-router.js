@@ -27,17 +27,13 @@ const { restricted } = require('../auth/auth-middleware')
     "message": "You shall not pass!"
   }
  */
-  router.get("/", restricted, (req, res, next) => {
-    if(userIsNotLoggedIn) {
-     next({ message: 'you shall not pass'});
-     return;
+  router.get("/", restricted, async (req, res, next) => {
+    try {
+      const users = await Users.find()
+      res.json(users)
+    }catch(error){
+      next(error)
     }
-   
-     Users.find()
-       .then(users => {
-         res.status(200).json(users)
-       })
-       .catch(next)
    })
 
 

@@ -1,6 +1,4 @@
-const bcrypt = require('bcryptjs');
-
-const express = require('express');
+// const bcrypt = require('bcryptjs');
 
 const Users = require('../users/users-model')
 
@@ -12,8 +10,9 @@ const Users = require('../users/users-model')
     "message": "You shall not pass!"
   }
 */
-function restricted() {
-  
+function restricted(req, res, next) {
+  console.log('restricted')
+  next()
 }
 
 /*
@@ -24,13 +23,14 @@ function restricted() {
     "message": "Username taken"
   }
 */
-async function checkUsernameFree(req,res,next) {
-  const result = await Users.findBy({ username: req.user.username }).first();
-    if(result != null) {
-        next({ status: 422, message: 'Username taken' });
-        return;
-    }
-    next();
+async function checkUsernameFree(req, res, next) {
+  try {
+    const users = await Users.findBy({ username: req.body.username })
+    if (!users.length) next()
+    else next({ 'message': 'Username taken' })
+  } catch (err) {
+    next(err)
+  }
 }
 
 /*
@@ -41,8 +41,8 @@ async function checkUsernameFree(req,res,next) {
     "message": "Invalid credentials"
   }
 */
-function checkUsernameExists() {
-
+function checkUsernameExists(req, res, next) {
+  next()
 }
 
 /*
@@ -53,8 +53,8 @@ function checkUsernameExists() {
     "message": "Password must be longer than 3 chars"
   }
 */
-function checkPasswordLength() {
-
+function checkPasswordLength(req, res, next) {
+  next()
 }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
